@@ -1,5 +1,7 @@
 import streamlit as st
 from orchestrator import run_all_agents
+from tracker import save_session, get_user_sessions, get_session_count
+from charts import show_mood_chart
 
 # ─── Page config ─────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -12,14 +14,43 @@ st.set_page_config(
 st.title("🧠 Mental Wellbeing Support Agent")
 st.markdown("""
 Welcome. This tool uses a team of AI agents to give you personalized mental wellness support.
-**Your responses are not stored anywhere.** Take your time filling this in honestly.
+**Your responses are not stored anywhere personally.** Take your time filling this in honestly.
 """)
 st.divider()
+
+# ─── Nickname input (outside form — loads history instantly on typing) ────────
+st.markdown("#### Before you begin")
+nickname = st.text_input(
+    "Enter a nickname to track your progress over time:",
+    placeholder="e.g. arjun, student01, anon — anything you'll remember",
+    max_chars=30
+)
+
+# ── Show existing history if nickname has past sessions ──────────────────────
+if nickname and nickname.strip():
+    past_sessions = get_user_sessions(nickname)
+    session_count = get_session_count(nickname)
+
+    if session_count > 0:
+        st.markdown(
+            f"👋 Welcome back, **{nickname.capitalize()}**! "
+            f"You have completed **{session_count}** session(s) so far."
+        )
+        # Show chart above the form so returning users see their trend first
+        show_mood_chart(past_sessions, nickname)
+        st.divider()
+    else:
+        st.markdown(
+            f"👋 Hello, **{nickname.capitalize()}**! "
+            "This looks like your first session. Let's get started."
+        )
+        st.divider()
 
 # ─── Input Form ──────────────────────────────────────────────────────────────
 st.header("Tell us how you're doing")
 
 with st.form("wellbeing_form"):
+
     st.subheader("1. Your emotional state")
     emotional_state = st.slider(
         "On a scale of 1-10, how are you feeling overall? (1 = very low, 10 = great)",
@@ -75,7 +106,6 @@ with st.form("wellbeing_form"):
         ]
     )
 
-    # Safety notice
     st.warning("""
     ⚠️ **Important:** This tool is for general wellness support only, not a substitute for
     professional mental health care. If you are in crisis or having thoughts of self-harm,
@@ -84,7 +114,7 @@ with st.form("wellbeing_form"):
     """)
 
     submitted = st.form_submit_button(
-        "🔍 Get My Personalized Support Plan",
+        "Analyse My Wellbeing",
         use_container_width=True
     )
 
@@ -92,6 +122,10 @@ with st.form("wellbeing_form"):
 if submitted:
 
     # ── Validation ────────────────────────────────────────────────────────────
+    if not nickname or not nickname.strip():
+        st.error("Please enter a nickname above before submitting.")
+        st.stop()
+
     if not feelings_description.strip():
         st.error("Please describe how you're feeling before submitting.")
         st.stop()
@@ -109,7 +143,11 @@ if submitted:
         "symptoms": ", ".join(symptoms) if symptoms else "None selected"
     }
 
-    # ── Call orchestrator (crisis check + agents) ─────────────────────────────
+    # ── Save session BEFORE running agents ────────────────────────────────────
+    # We save first so even if the API call fails, the check-in is recorded
+    save_session(nickname, user_data)
+
+    # ── Call orchestrator (crisis check happens inside here first) ────────────
     with st.spinner("Your AI support team is analysing your situation... (this takes 10-20 seconds)"):
         try:
             results = run_all_agents(user_data)
@@ -119,8 +157,7 @@ if submitted:
             st.stop()
 
     # ─────────────────────────────────────────────────────────────────────────
-    # CRISIS PATH — shown ONLY when crisis keywords were detected
-    # No AI output is shown. Only human helpline numbers.
+    # CRISIS PATH
     # ─────────────────────────────────────────────────────────────────────────
     if results.get("crisis_detected"):
 
@@ -168,11 +205,10 @@ if submitted:
             "Talking to someone is a sign of strength, not weakness."
         )
 
-        # Hard stop — normal AI results must never appear during a crisis
         st.stop()
 
     # ─────────────────────────────────────────────────────────────────────────
-    # NORMAL PATH — only reaches here when no crisis detected
+    # NORMAL PATH
     # ─────────────────────────────────────────────────────────────────────────
     st.success("✅ Your personalized support plan is ready!")
     st.divider()
@@ -187,6 +223,15 @@ if submitted:
 
     with st.expander("🔄 Long-term Strategy: Building Lasting Wellbeing", expanded=True):
         st.markdown(results["followup"])
+
+    st.divider()
+
+    # ── Show updated chart after this session ─────────────────────────────────
+    # Reload sessions which now includes the one we just saved
+    updated_sessions = get_user_sessions(nickname)
+    if len(updated_sessions) >= 2:
+        st.markdown("### Your progress so far")
+        show_mood_chart(updated_sessions, nickname)
 
     st.divider()
     st.caption(
