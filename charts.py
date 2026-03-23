@@ -70,39 +70,35 @@ def show_mood_chart(sessions: list, nickname: str) -> None:
 
     # ── Layout ────────────────────────────────────────────────────────────────
     fig.update_layout(
-        # No title inside the chart — we use st.markdown above
         margin=dict(t=20, b=20, l=20, r=20),
-        paper_bgcolor="rgba(0,0,0,0)",   # transparent — matches Streamlit bg
+        paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-
-        # X axis
+        font=dict(color="#8888aa"),
         xaxis=dict(
             title="Sessions",
             showgrid=False,
-            tickfont=dict(size=12),
+            tickfont=dict(size=12, color="#8888aa"),
+            linecolor="rgba(127,119,221,0.2)",
         ),
-
-        # Y axis — fixed 0 to 12 covers all three metrics comfortably
         yaxis=dict(
             title="Score",
             range=[0, 12],
             showgrid=True,
-            gridcolor="rgba(128,128,128,0.15)",
+            gridcolor="rgba(127,119,221,0.1)",
             tickvals=[0, 2, 4, 6, 8, 10, 12],
-            tickfont=dict(size=12),
+            tickfont=dict(size=12, color="#8888aa"),
+            linecolor="rgba(127,119,221,0.2)",
         ),
-
-        # Legend at the bottom so it doesn't crowd the chart
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=-0.3,
+            y=-0.35,
             xanchor="center",
             x=0.5,
-            font=dict(size=12)
+            font=dict(size=12, color="#8888aa"),
+            bgcolor="rgba(0,0,0,0)"
         ),
-
-        hovermode="x unified",   # shows all three values on hover together
+        hovermode="x unified",
         height=360,
     )
 
