@@ -77,22 +77,26 @@ with st.form("wellbeing_form"):
 
     # Safety notice
     st.warning("""
-    ⚠️ **Important:** This tool is for general wellness support only, not a substitute for 
-    professional mental health care. If you are in crisis or having thoughts of self-harm, 
+    ⚠️ **Important:** This tool is for general wellness support only, not a substitute for
+    professional mental health care. If you are in crisis or having thoughts of self-harm,
     please contact a crisis helpline immediately:
     **iCall (India): 9152987821** | **Vandrevala Foundation: 1860-2662-345**
     """)
 
-    submitted = st.form_submit_button("🔍 Get My Personalized Support Plan", use_container_width=True)
+    submitted = st.form_submit_button(
+        "🔍 Get My Personalized Support Plan",
+        use_container_width=True
+    )
 
 # ─── Processing and Output ────────────────────────────────────────────────────
 if submitted:
-    # Validate that the user filled in the important fields
+
+    # ── Validation ────────────────────────────────────────────────────────────
     if not feelings_description.strip():
         st.error("Please describe how you're feeling before submitting.")
         st.stop()
 
-    # Pack all form data into a dictionary
+    # ── Pack form data ────────────────────────────────────────────────────────
     user_data = {
         "emotional_state": emotional_state,
         "feelings_description": feelings_description,
@@ -105,8 +109,8 @@ if submitted:
         "symptoms": ", ".join(symptoms) if symptoms else "None selected"
     }
 
-    # Show a spinner while all 3 agents work
-    with st.spinner("Your AI support team is analyzing your situation... (this takes 10-20 seconds)"):
+    # ── Call orchestrator (crisis check + agents) ─────────────────────────────
+    with st.spinner("Your AI support team is analysing your situation... (this takes 10-20 seconds)"):
         try:
             results = run_all_agents(user_data)
         except Exception as e:
@@ -114,10 +118,65 @@ if submitted:
             st.info("Check that your GROQ_API_KEY in the .env file is correct.")
             st.stop()
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # CRISIS PATH — shown ONLY when crisis keywords were detected
+    # No AI output is shown. Only human helpline numbers.
+    # ─────────────────────────────────────────────────────────────────────────
+    if results.get("crisis_detected"):
+
+        st.error("🚨 We're concerned about your safety right now")
+
+        st.markdown(f"""
+        <div style="
+            background-color: #fff0f0;
+            border: 1.5px solid #E24B4A;
+            border-radius: 12px;
+            padding: 1.2rem 1.4rem;
+            margin: 1rem 0;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #333;
+        ">
+            {results['message']}
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.subheader("📞 Free Helplines — Available Right Now")
+
+        for name, number in results["resources"].items():
+            st.markdown(f"""
+            <div style="
+                background: white;
+                border: 0.5px solid #E24B4A;
+                border-left: 4px solid #E24B4A;
+                border-radius: 8px;
+                padding: 12px 16px;
+                margin-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <span style="font-weight:600; font-size:14px; color:#333;">{name}</span>
+                <span style="font-size:18px; font-weight:700;
+                      color:#A32D2D; letter-spacing:0.03em;">{number}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.info(
+            "💙 You don't have to go through this alone. "
+            "These helplines are free, confidential, and available 24/7. "
+            "Talking to someone is a sign of strength, not weakness."
+        )
+
+        # Hard stop — normal AI results must never appear during a crisis
+        st.stop()
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # NORMAL PATH — only reaches here when no crisis detected
+    # ─────────────────────────────────────────────────────────────────────────
     st.success("✅ Your personalized support plan is ready!")
     st.divider()
 
-    # Display results in expandable sections
     st.header("Your Mental Wellbeing Report")
 
     with st.expander("🧠 Assessment: Understanding Your Current State", expanded=True):
@@ -131,4 +190,6 @@ if submitted:
 
     st.divider()
     st.caption(
-        "Remember: This AI-generated plan is a starting point. Please seek professional help if you need more support.")
+        "Remember: This AI-generated plan is a starting point. "
+        "Please seek professional help if you need more support."
+    )
