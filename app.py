@@ -869,28 +869,10 @@ if submitted:
         <div class="card-content">{results["assessment"]}</div>
     </div>
     """, unsafe_allow_html=True)
-    # Assessment card
-    st.markdown("""
-    <div class="result-card card-assessment scroll-reveal">
-        <span class="card-badge badge-teal">🧠 Assessment Agent</span>
-    """, unsafe_allow_html=True)
-    st.markdown(f"""
-        <div class="card-content">{results["assessment"]}</div>
-    </div>
-    """, unsafe_allow_html=True)
 
     # Action card
     st.markdown("""
     <div class="result-card card-action">
-        <span class="card-badge badge-purple">🎯 Action Agent</span>
-    """, unsafe_allow_html=True)
-    st.markdown(f"""
-        <div class="card-content">{results["action_plan"]}</div>
-    </div>
-    """, unsafe_allow_html=True)
-    # Action card
-    st.markdown("""
-    <div class="result-card card-action scroll-reveal">
         <span class="card-badge badge-purple">🎯 Action Agent</span>
     """, unsafe_allow_html=True)
     st.markdown(f"""
