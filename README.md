@@ -6,7 +6,7 @@ Built using Python, Streamlit, and Groq-powered LLMs, the system leverages a mul
 
 The project focuses on combining AI engineering with human-centered design to create a safe, accessible, and privacy-conscious wellness experience.
 
-🔗 **Live Demo:** [MindCare AI Live Application](#) *(Note: Insert your actual link here)*
+🔗 **Live Demo:** [MindCare AI Live Application](https://mindcare-ai-assistant.streamlit.app/) 
 
 ---
 
