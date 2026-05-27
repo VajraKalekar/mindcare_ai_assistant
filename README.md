@@ -1,5 +1,7 @@
 # 🧠 MindCare AI: AI-Powered Multi-Agent Mental Wellness Support System
 
+ ![Landing Page](screenshots/hero.png)
+
 MindCare AI is an intelligent mental wellness assistant designed to help users better understand, reflect on, and manage their emotional wellbeing through AI-driven conversational support.
 
 Built using Python, Streamlit, and Groq-powered LLMs, the system leverages a multi-agent AI architecture where specialised agents collaboratively analyze emotional states, generate practical coping strategies, provide wellness guidance, and deliver crisis-aware support recommendations — all through a modern, interactive interface.
@@ -85,9 +87,13 @@ Combined Wellness Response
 ## 📸 Application Screens
 
 * **🏠 Landing Interface:** Modern animated wellness dashboard with guided interaction flow.
+  ![Landing Page](screenshots/hero.png)
 * **📝 Wellness Assessment Form:** Interactive emotional wellbeing questionnaire designed for reflective user input.
+  ![wellness assessment](screenshots/interface.png)
+  ![wellness assessment](screenshots/crisis.png)
 * **📊 AI Wellness Report:** Personalized AI-generated emotional wellness analysis with actionable recommendations.
-
+  ![ai wellness report](screenshots/report1.png)
+   ![ai wellness report](screenshots/report2.png)
 ---
 
 ## 🔐 Privacy & Data Handling
